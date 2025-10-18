@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>screen comparison tool | screeny</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: system-ui, sans-serif;
+        background: Canvas;
+        color: CanvasText;
+        padding: 16px;
+        max-width: 60rem;
+        margin-inline: auto;
+        line-height: 1.5;
+        font-size: 1.25rem;
+      }
+
+      *,
+      ::before,
+      ::after {
+        box-sizing: border-box;
+      }
+
+      button,
+      input,
+      textarea,
+      select {
+        font: inherit;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-top: 0;
+        margin-bottom: -4px;
+        line-height: 1.25;
+      }
+
+      h1 + p {
+        margin-top: 0;
+        margin-bottom: 32px;
+      }
+
+      fieldset {
+        display: grid;
+        border-radius: 0;
+        gap: 8px 16px;
+        appearance: none;
+        border: 2px solid;
+        padding: 16px;
+        margin: 0;
+        box-shadow: 0 1px 0 black;
+      }
+
+      form {
+        display: grid;
+        gap: 16px;
+      }
+
+      @media (width >= 40rem) {
+        form {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      legend {
+        font-size: 1.5rem;
+        font-weight: bold;
+        background: Honeydew;
+        padding-block: 4px;
+        padding-inline: 16px;
+        margin-left: -18px;
+        border-radius: 0;
+        border: inherit;
+        box-shadow: 0 1px 0 black;
+        line-height: 1.25;
+      }
+
+      fieldset > label {
+        display: grid;
+        gap: 4px;
+      }
+
+      output {
+        border-radius: 0;
+        display: block;
+        border: 2px dotted;
+        padding: 8px 16px;
+        background: LemonChiffon;
+      }
+
+      input {
+        border: 2px solid;
+        border-radius: 0;
+        padding: 4px 16px;
+        box-shadow: inset 0 1px 0 black;
+      }
+
+      button {
+        font-weight: bold;
+        border: 2px solid;
+        border-radius: 0;
+        box-shadow: inset 0 -1px 0 black;
+        background: inherit;
+        padding: 4px 16px;
+        background: PaleGreen;
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+      }
+
+      button:active {
+        box-shadow: inset 0 1px 0 black;
+        background-image: linear-gradient(#0002 0 100%);
+      }
+
+      :focus-visible {
+        outline: 3px solid;
+        outline-offset: 2px;
+        box-shadow: inset 0 0 0 2px white;
+      }
+
+      :is(input, button):focus-visible {
+        outline: 3px solid;
+        outline-offset: -1px;
+        box-shadow: inset 0 0 0 2px white;
+      }
+
+      .old {
+        background: Pink;
+      }
+
+      .new {
+        background: LightBlue;
+      }
+
+      .full-width {
+        grid-column: 1 / -1;
+      }
+
+      .result {
+        font-weight: bold;
+      }
+
+      :any-link {
+        color: inherit;
+        text-decoration-thickness: 1.5px;
+        text-underline-position: below;
+        text-underline-offset: calc(1em / 8);
+      }
+
+      ::selection {
+        background: black;
+        color: white;
+        text-shadow: none;
+      }
+    </style>
+    <script type="module">
+      /** @returns {never} */
+      function die(message) {
+        throw new Error(message);
+      }
+
+      class ScreenyApp extends HTMLElement {
+        #abortController = new AbortController();
+
+        connectedCallback() {
+          this.#abortController = new AbortController();
+          const { signal } = this.#abortController;
+          this.form = this.querySelector("form");
+          if (!this.form) {
+            throw new Error("oh no");
+          }
+          this.addEventListener(
+            "input",
+            (event) => {
+              this.#update();
+            },
+            { signal }
+          );
+          this.addEventListener(
+            "click",
+            (event) => {
+              if (event.target.id === "swap") {
+                this.#swap();
+              }
+            },
+            { signal }
+          );
+          this.#update();
+        }
+
+        disconnectedCallback() {
+          this.#abortController.abort();
+        }
+
+        /** @returns {HTMLElement} */
+        #$(selector) {
+          return this.querySelector(selector) || die(`can't find ${selector}`);
+        }
+
+        #update() {
+          const form = this.#$("form");
+          const resultSize = this.#$("#result-size");
+          const resultQuality = this.#$("#result-quality");
+          const resultFont = this.#$("#result-font");
+          const data = new FormData(form);
+          const oldWidth = Number(data.get("old-width"));
+          const oldHeight = Number(data.get("old-height"));
+          const oldSize = Number(data.get("old-size"));
+          const oldScale = Number(data.get("old-scale"));
+          const newWidth = Number(data.get("new-width"));
+          const newHeight = Number(data.get("new-height"));
+          const newSize = Number(data.get("new-size"));
+          const newScale = Number(data.get("new-scale"));
+          const oldPpi = this.#computePixelsPerInch(
+            oldWidth,
+            oldHeight,
+            oldSize
+          );
+          const newPpi = this.#computePixelsPerInch(
+            newWidth,
+            newHeight,
+            newSize
+          );
+          const oldEffectivePpi = oldPpi / (oldScale / 100);
+          const newEffectivePpi = newPpi / (newScale / 100);
+          const scale = this.#percentage(oldEffectivePpi / newEffectivePpi);
+          resultSize.textContent = scale;
+          resultQuality.textContent = this.#percentage(newScale / oldScale);
+          resultFont.textContent = (16 * (scale / 100)).toFixed(2);
+        }
+
+        #percentage(x) {
+          return Number((x * 100).toFixed(2));
+        }
+
+        #computePixelsPerInch(pixelWidth, pixelHeight, diagonalInches) {
+          const diagonalPixels = Math.sqrt(pixelWidth ** 2 + pixelHeight ** 2);
+          return Number((diagonalPixels / diagonalInches).toFixed(2));
+        }
+
+        #swap() {
+          const fields = ["width", "height", "size", "scale"];
+          for (const f of fields) {
+            const oldField = this.#$(`[name="old-${f}"]`);
+            const newField = this.#$(`[name="new-${f}"]`);
+            [oldField.value, newField.value] = [newField.value, oldField.value];
+            this.#update();
+          }
+        }
+      }
+
+      customElements.define("screeny-app", ScreenyApp);
+    </script>
+  </head>
+  <body>
+    <h1>screeny</h1>
+    <p>
+      a screen comparison tool by <a href="https://wavebeem.com">wavebeem</a>.
+    </p>
+    <screeny-app>
+      <form>
+        <fieldset class="old">
+          <legend>old screen</legend>
+          <label>
+            <span>width in pixels</span>
+            <input type="text" name="old-width" value="1920" />
+          </label>
+          <label>
+            <span>height in pixels</span>
+            <input type="text" name="old-height" value="1080" />
+          </label>
+          <label>
+            <span>diagonal size in inches</span>
+            <input type="text" name="old-size" value="24" />
+          </label>
+          <label>
+            <span>display scaling percentage</span>
+            <input type="text" name="old-scale" value="100" />
+          </label>
+        </fieldset>
+        <fieldset class="new">
+          <legend>new screen</legend>
+          <label>
+            <span>width in pixels</span>
+            <input type="text" name="new-width" value="3840" />
+          </label>
+          <label>
+            <span>height in pixels</span>
+            <input type="text" name="new-height" value="2160" />
+          </label>
+          <label>
+            <span>diagonal size in inches</span>
+            <input type="text" name="new-size" value="32" />
+          </label>
+          <label>
+            <span>display scaling percentage</span>
+            <input type="text" name="new-scale" value="200" />
+          </label>
+        </fieldset>
+        <div class="full-width">
+          <button type="button" id="swap">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-arrow-left-right"
+              viewBox="0 0 16 16"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5m14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5"
+              />
+            </svg>
+            swap
+          </button>
+        </div>
+        <output class="full-width"
+          >content on your new screen will look
+          <span class="result" id="result-size">???</span>% as large and
+          <span class="result" id="result-quality">???</span>% as sharp as your
+          old screen. a 16 pixel font size on your new screen will look as large
+          as a <span class="result" id="result-font">???</span> pixel font size
+          on your old screen.
+        </output>
+      </form>
+    </screeny-app>
+  </body>
+</html>
