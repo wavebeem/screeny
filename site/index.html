@@ -12,11 +12,12 @@
       }
 
       body {
-        font-family: system-ui, sans-serif;
-        background: white;
+        font-family: Seravek, "Gill Sans Nova", Ubuntu, Calibri, "DejaVu Sans",
+          source-sans-pro, sans-serif;
+        background: PapayaWhip;
         color: black;
         padding: 16px;
-        max-width: 50rem;
+        max-width: 40rem;
         margin-inline: auto;
         line-height: 1.5;
         font-size: 1.25rem;
@@ -72,10 +73,11 @@
       legend {
         font-size: 1.5rem;
         font-weight: bold;
-        background: Honeydew;
+        background: seashell;
         padding-block: 4px;
         padding-inline: 16px;
         margin-left: -18px;
+        margin-bottom: -8px;
         border-radius: 0;
         border: inherit;
         box-shadow: 0 1px 0 black;
@@ -92,7 +94,14 @@
         display: block;
         border: 2px dotted;
         padding: 8px 16px;
-        background: LemonChiffon;
+        background: gold;
+      }
+
+      output ul {
+        margin: 0;
+        list-style-position: inside;
+        padding: 0;
+        list-style-type: disc;
       }
 
       input {
@@ -109,7 +118,7 @@
         box-shadow: inset 0 -1px 0 black;
         background: inherit;
         padding: 4px 16px;
-        background: PaleGreen;
+        background: springgreen;
         display: flex;
         gap: 8px;
         justify-content: center;
@@ -124,7 +133,7 @@
       :focus-visible {
         outline: 3px solid;
         outline-offset: 2px;
-        box-shadow: inset 0 0 0 2px white;
+        box-shadow: 0 0 0 2px white;
       }
 
       :is(input, button):focus-visible {
@@ -134,11 +143,11 @@
       }
 
       .old {
-        background: Pink;
+        background: pink;
       }
 
       .new {
-        background: LightBlue;
+        background: skyblue;
       }
 
       .full-width {
@@ -153,7 +162,7 @@
         color: inherit;
         text-decoration-thickness: 1.5px;
         text-underline-position: below;
-        text-underline-offset: calc(1em / 8);
+        text-underline-offset: calc(1em / 6);
       }
 
       ::selection {
@@ -264,7 +273,9 @@
   <body>
     <h1>screeny</h1>
     <p>
-      a screen comparison tool by <a href="https://wavebeem.com">wavebeem</a>.
+      a screen comparison tool &bull; by
+      <a href="https://wavebeem.com">wavebeem</a> &bull;
+      <a href="https://github.com/wavebeem/screeny">source code</a>
     </p>
     <screeny-app>
       <form>
@@ -324,13 +335,23 @@
             swap
           </button>
         </div>
-        <output class="full-width"
-          >content on your new screen will look
-          <span class="result" id="result-size">???</span>% as large and
-          <span class="result" id="result-quality">???</span>% as sharp as your
-          old screen. a 16 pixel font size on your new screen will look as large
-          as a <span class="result" id="result-font">???</span> pixel font size
-          on your old screen.
+        <output class="full-width">
+          <ul>
+            <li>
+              the new screen is
+              <span class="result" id="result-size">???</span>% as large as the
+              old screen
+            </li>
+            <li>
+              the new screen is
+              <span class="result" id="result-quality">???</span>% as sharp as
+              the old screen
+            </li>
+            <li>
+              16 old screen pixels are the size of
+              <span class="result" id="result-font">???</span> new screen pixels
+            </li>
+          </ul>
         </output>
       </form>
     </screeny-app>
