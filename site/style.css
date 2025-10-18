@@ -2,7 +2,8 @@
   font-family: "Roboto";
   src: url("./fonts/Roboto-VariableFont_wdth\,wght.ttf");
   font-weight: 100 900;
-  font-display: auto;
+  font-stretch: 100%;
+  font-display: swap;
 }
 
 @font-face {
@@ -10,7 +11,8 @@
   src: url("./fonts/Roboto-Italic-VariableFont_wdth\,wght.ttf");
   font-weight: 100 900;
   font-style: italic;
-  font-display: auto;
+  font-stretch: 100%;
+  font-display: swap;
 }
 
 html,
@@ -55,6 +57,8 @@ h1 {
   text-transform: uppercase;
   padding: 0 8px;
   max-width: max-content;
+  font-stretch: extra-condensed;
+  font-weight: 300;
 }
 
 h1 + ul {
@@ -86,7 +90,7 @@ form {
 
 legend {
   font-size: 1.5rem;
-  font-weight: bold;
+  font-weight: 600;
   background: inherit;
   padding-block: 4px;
   padding-inline: 16px;
@@ -108,19 +112,20 @@ output {
   display: block;
   border: 2px dotted;
   padding: 16px;
-  background: gold;
+  background: palegoldenrod;
 }
 
 dl {
   border-radius: 0;
   margin: 0;
-  background: FloralWhite;
+  background: floralwhite;
+
   padding: 16px;
   border: 2px dotted;
 }
 
 dt {
-  font-weight: bold;
+  font-weight: 700;
 }
 
 dd {
@@ -147,7 +152,7 @@ output thead tr {
 }
 
 output tbody tr:not(:last-child) {
-  border-bottom: 1px dotted;
+  border-bottom: 1px solid rgb(from currentColor r g b / 25%);
 }
 
 output th {
@@ -179,13 +184,13 @@ input {
 }
 
 button {
-  font-weight: bold;
+  font-weight: 500;
   border: 2px solid;
   border-radius: 0;
   box-shadow: 0 1px 0 black;
   background: inherit;
   padding: 4px 16px;
-  background: springgreen;
+  background: lightgreen;
   display: flex;
   gap: 8px;
   justify-content: center;
