@@ -4,349 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>screen comparison tool | screeny</title>
-    <style>
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-      }
-
-      body {
-        font-family: Seravek, "Gill Sans Nova", Ubuntu, Calibri, "DejaVu Sans",
-          source-sans-pro, sans-serif;
-        background: PapayaWhip;
-        color: black;
-        padding: 16px;
-        max-width: 40rem;
-        margin-inline: auto;
-        line-height: 1.5;
-        font-size: 1.25rem;
-      }
-
-      *,
-      ::before,
-      ::after {
-        box-sizing: border-box;
-      }
-
-      button,
-      input,
-      textarea,
-      select {
-        font: inherit;
-      }
-
-      h1 {
-        font-size: 2.5rem;
-        margin-top: 0;
-        margin-bottom: -4px;
-        line-height: 1.25;
-        background: black;
-        color: white;
-        color: PapayaWhip;
-        text-transform: uppercase;
-        padding: 0 8px;
-        max-width: max-content;
-      }
-
-      h1 + ul {
-        margin-top: 0;
-        margin-bottom: 32px;
-      }
-
-      fieldset {
-        display: grid;
-        border-radius: 0;
-        gap: 8px 16px;
-        appearance: none;
-        border: 2px solid;
-        padding: 16px;
-        margin: 0;
-        box-shadow: 0 1px 0 black;
-      }
-
-      form {
-        display: grid;
-        gap: 16px;
-      }
-
-      @media (width >= 40rem) {
-        form {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
-
-      legend {
-        font-size: 1.5rem;
-        font-weight: bold;
-        background: inherit;
-        padding-block: 4px;
-        padding-inline: 16px;
-        margin-left: -18px;
-        margin-bottom: -8px;
-        border-radius: 0;
-        border: inherit;
-        box-shadow: 0 1px 0 black;
-        line-height: 1.25;
-        text-transform: uppercase;
-      }
-
-      fieldset > label {
-        display: grid;
-        gap: 0;
-      }
-
-      output {
-        border-radius: 0;
-        display: block;
-        border: 2px dotted;
-        padding: 16px;
-        background: gold;
-      }
-
-      dl {
-        margin: 0;
-        background: FloralWhite;
-        padding: 16px;
-        border: 2px dotted;
-      }
-
-      dt {
-        font-weight: bold;
-      }
-
-      dd {
-        margin: 0;
-      }
-
-      dd + dt {
-        margin-top: 16px;
-      }
-
-      output table {
-        width: 100%;
-        margin: 0;
-        padding: 0;
-        padding-left: 1em;
-        list-style-type: disc;
-        border-collapse: collapse;
-        table-layout: fixed;
-        font-variant-numeric: tabular-nums;
-      }
-
-      output thead tr {
-        border-bottom: 2px solid;
-      }
-
-      output tbody tr:not(:last-child) {
-        border-bottom: 1px dotted;
-      }
-
-      output th {
-        text-align: left;
-      }
-
-      output thead th,
-      output td {
-        text-align: right;
-      }
-
-      output :is(td, th) {
-        padding: 4px 16px;
-      }
-
-      output :is(td, th):first-child {
-        padding-left: 0;
-      }
-
-      output :is(td, th):last-child {
-        padding-right: 0;
-      }
-
-      input {
-        border: 2px solid;
-        border-radius: 0;
-        padding: 4px 16px;
-        box-shadow: inset 0 1px 0 black;
-      }
-
-      button {
-        font-weight: bold;
-        border: 2px solid;
-        border-radius: 0;
-        box-shadow: 0 1px 0 black;
-        background: inherit;
-        padding: 4px 16px;
-        background: springgreen;
-        display: flex;
-        gap: 8px;
-        justify-content: center;
-        align-items: center;
-      }
-
-      button:active {
-        box-shadow: inset 0 1px 0 black;
-        background-image: linear-gradient(#0002 0 100%);
-      }
-
-      :focus-visible {
-        outline: 3px solid;
-        outline-offset: 2px;
-        box-shadow: 0 0 0 2px white;
-      }
-
-      :is(input, button):focus-visible {
-        outline: 3px solid;
-        outline-offset: -1px;
-        box-shadow: inset 0 0 0 2px white;
-      }
-
-      .old {
-        background: pink;
-      }
-
-      .new {
-        background: skyblue;
-      }
-
-      .full-width {
-        grid-column: 1 / -1;
-      }
-
-      .inline-list {
-        padding: 0;
-        padding-left: 1em;
-      }
-
-      @media (width >= 40rem) {
-        .inline-list {
-          display: flex;
-          list-style-position: inside;
-          padding: 0;
-          gap: 0 8px;
-          flex-wrap: wrap;
-        }
-      }
-
-      :any-link {
-        color: inherit;
-        text-decoration-thickness: 1.5px;
-        text-underline-position: below;
-        text-underline-offset: calc(1em / 6);
-      }
-
-      ::selection {
-        background: black;
-        color: white;
-        text-shadow: none;
-      }
-    </style>
-    <script type="module">
-      /** @returns {never} */
-      function die(message) {
-        throw new Error(message);
-      }
-
-      class ScreenyApp extends HTMLElement {
-        #abortController = new AbortController();
-
-        connectedCallback() {
-          this.#abortController = new AbortController();
-          const { signal } = this.#abortController;
-          this.form = this.querySelector("form");
-          if (!this.form) {
-            throw new Error("oh no");
-          }
-          this.addEventListener(
-            "input",
-            (event) => {
-              this.#update();
-            },
-            { signal }
-          );
-          this.addEventListener(
-            "click",
-            (event) => {
-              if (event.target?.closest("button")?.id === "swap") {
-                this.#swap();
-              }
-            },
-            { signal }
-          );
-          this.#update();
-        }
-
-        disconnectedCallback() {
-          this.#abortController.abort();
-        }
-
-        /** @returns {HTMLElement} */
-        #$(selector) {
-          return this.querySelector(selector) || die(`can't find ${selector}`);
-        }
-
-        #update() {
-          const form = this.#$("form");
-          const data = new FormData(form);
-          const oldWidth = Number(data.get("old-width"));
-          const oldHeight = Number(data.get("old-height"));
-          const oldSize = Number(data.get("old-size"));
-          const oldScale = Number(data.get("old-scale"));
-          const newWidth = Number(data.get("new-width"));
-          const newHeight = Number(data.get("new-height"));
-          const newSize = Number(data.get("new-size"));
-          const newScale = Number(data.get("new-scale"));
-          const oldPpi = this.#computePixelsPerInch(
-            oldWidth,
-            oldHeight,
-            oldSize
-          );
-          const newPpi = this.#computePixelsPerInch(
-            newWidth,
-            newHeight,
-            newSize
-          );
-          const oldEffectivePpi = oldPpi / (oldScale / 100);
-          const newEffectivePpi = newPpi / (newScale / 100);
-          const scale = this.#percentage(oldEffectivePpi / newEffectivePpi);
-          this.#setResult("size", scale.toFixed(2));
-          this.#setResult(
-            "quality",
-            this.#percentage(newScale / oldScale).toFixed(2)
-          );
-          this.#setResult("font", (16 * (scale / 100)).toFixed(2));
-          this.#setResult("old-ppi-raw", oldPpi.toFixed(2));
-          this.#setResult("old-ppi-effective", oldEffectivePpi.toFixed(2));
-          this.#setResult("new-ppi-raw", newPpi.toFixed(2));
-          this.#setResult("new-ppi-effective", newEffectivePpi.toFixed(2));
-        }
-
-        #setResult(name, value) {
-          this.#$(`#result-${name}`).textContent = value;
-        }
-
-        #percentage(x) {
-          return Number((x * 100).toFixed(2));
-        }
-
-        #computePixelsPerInch(pixelWidth, pixelHeight, diagonalInches) {
-          const diagonalPixels = Math.sqrt(pixelWidth ** 2 + pixelHeight ** 2);
-          return Number((diagonalPixels / diagonalInches).toFixed(2));
-        }
-
-        #swap() {
-          const fields = ["width", "height", "size", "scale"];
-          for (const f of fields) {
-            const oldField = this.#$(`[name="old-${f}"]`);
-            const newField = this.#$(`[name="new-${f}"]`);
-            [oldField.value, newField.value] = [newField.value, oldField.value];
-            this.#update();
-          }
-        }
-      }
-
-      customElements.define("screeny-app", ScreenyApp);
-    </script>
+    <link href="./style.css" rel="stylesheet" />
+    <script type="module" src="./main.mjs"></script>
   </head>
   <body>
     <h1>screeny</h1>
@@ -424,27 +83,27 @@
             </thead>
             <tbody>
               <tr>
-                <th>size</th>
+                <th>dip size</th>
                 <td>100.00%</td>
                 <td><span class="result" id="result-size">???</span>%</td>
               </tr>
               <tr>
-                <th>detail</th>
+                <th>dip detail</th>
                 <td>100.00%</td>
                 <td><span class="result" id="result-quality">???</span>%</td>
               </tr>
               <tr>
                 <th>font size</th>
-                <td>16.00px</td>
-                <td><span class="result" id="result-font">???</span>px</td>
+                <td>16.0 dip</td>
+                <td><span class="result" id="result-font">???</span> dip</td>
               </tr>
               <tr>
-                <th>raw PPI</th>
+                <th>pixels per inch</th>
                 <td><span class="result" id="result-old-ppi-raw">???</span></td>
                 <td><span class="result" id="result-new-ppi-raw">???</span></td>
               </tr>
               <tr>
-                <th>PPI</th>
+                <th>dips per inch</th>
                 <td>
                   <span class="result" id="result-old-ppi-effective">???</span>
                 </td>
@@ -456,23 +115,46 @@
           </table>
         </output>
         <dl class="full-width">
-          <dt>size</dt>
-          <dd>percentage difference in PPI between screens</dd>
+          <dt>pixel</dt>
+          <dd>the smallest addressable unit of color on a screen.</dd>
 
-          <dt>detail</dt>
-          <dd>how many hardware pixels back each software pixel</dd>
+          <dt>dip</dt>
+          <dd>
+            the smallest addressable integer unit of color in software. apple
+            originally defined a <q>point</q> on a <q>retina display</q> as a
+            2x2 grid of hardware pixels. this allows "half pixel" values to be
+            drawn to the screen without color blending. android prefers the term
+            "dip", an acronym for "device indepent pixel". i will use the term
+            "dip" to avoid confusion with the unrelated "point" used in font
+            sizes.
+          </dd>
+
+          <dt>dip size</dt>
+          <dd>
+            percentage difference in dips per inch between screens. a larger
+            number means that an object drawn at the same size in software will
+            be that much larger physically on the new screen.
+          </dd>
+
+          <dt>dip detail</dt>
+          <dd>
+            how many hardware pixels back each dip (software pixel).
+            <q>retina</q> typically means each dip is a 2x2 square of hardware
+            pixels.
+          </dd>
 
           <dt>font size</dt>
           <dd>
-            a 16px font size looks like this many pixels on the new display
+            a 16 dip font size looks like this many dips on the new display.
           </dd>
 
-          <dt>raw PPI</dt>
-          <dd>the pixels per inch at a hardware level</dd>
+          <dt>pixels per inch</dt>
+          <dd>the number of pixels per inch on the screen.</dd>
 
-          <dt>PPI</dt>
+          <dt>dips per inch</dt>
           <dd>
-            lower number = larger on screen objects
+            the number of dips per inch on the screen. smaller numbers make
+            objects look bigger.
           </dd>
         </dl>
       </form>
