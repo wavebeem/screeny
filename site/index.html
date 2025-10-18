@@ -49,7 +49,7 @@
         max-width: max-content;
       }
 
-      h1 + p {
+      h1 + ul {
         margin-top: 0;
         margin-bottom: 32px;
       }
@@ -79,7 +79,7 @@
       legend {
         font-size: 1.5rem;
         font-weight: bold;
-        background: seashell;
+        background: inherit;
         padding-block: 4px;
         padding-inline: 16px;
         margin-left: -18px;
@@ -100,15 +100,67 @@
         border-radius: 0;
         display: block;
         border: 2px dotted;
-        padding: 8px 16px;
+        padding: 16px;
         background: gold;
       }
 
-      output ul {
+      dl {
         margin: 0;
-        list-style-position: inside;
+        background: FloralWhite;
+        padding: 16px;
+        border: 2px dotted;
+      }
+
+      dt {
+        font-weight: bold;
+      }
+
+      dd {
+        margin: 0;
+      }
+
+      dd + dt {
+        margin-top: 16px;
+      }
+
+      output table {
+        width: 100%;
+        margin: 0;
         padding: 0;
+        padding-left: 1em;
         list-style-type: disc;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-variant-numeric: tabular-nums;
+      }
+
+      output thead tr {
+        border-bottom: 2px solid;
+      }
+
+      output tbody tr:not(:last-child) {
+        border-bottom: 1px dotted;
+      }
+
+      output th {
+        text-align: left;
+      }
+
+      output thead th,
+      output td {
+        text-align: right;
+      }
+
+      output :is(td, th) {
+        padding: 4px 16px;
+      }
+
+      output :is(td, th):first-child {
+        padding-left: 0;
+      }
+
+      output :is(td, th):last-child {
+        padding-right: 0;
       }
 
       input {
@@ -122,7 +174,7 @@
         font-weight: bold;
         border: 2px solid;
         border-radius: 0;
-        box-shadow: inset 0 -1px 0 black;
+        box-shadow: 0 1px 0 black;
         background: inherit;
         padding: 4px 16px;
         background: springgreen;
@@ -161,8 +213,19 @@
         grid-column: 1 / -1;
       }
 
-      .result {
-        font-weight: bold;
+      .inline-list {
+        padding: 0;
+        padding-left: 1em;
+      }
+
+      @media (width >= 40rem) {
+        .inline-list {
+          display: flex;
+          list-style-position: inside;
+          padding: 0;
+          gap: 0 8px;
+          flex-wrap: wrap;
+        }
       }
 
       :any-link {
@@ -204,7 +267,7 @@
           this.addEventListener(
             "click",
             (event) => {
-              if (event.target.id === "swap") {
+              if (event.target?.closest("button")?.id === "swap") {
                 this.#swap();
               }
             },
@@ -224,9 +287,6 @@
 
         #update() {
           const form = this.#$("form");
-          const resultSize = this.#$("#result-size");
-          const resultQuality = this.#$("#result-quality");
-          const resultFont = this.#$("#result-font");
           const data = new FormData(form);
           const oldWidth = Number(data.get("old-width"));
           const oldHeight = Number(data.get("old-height"));
@@ -249,9 +309,20 @@
           const oldEffectivePpi = oldPpi / (oldScale / 100);
           const newEffectivePpi = newPpi / (newScale / 100);
           const scale = this.#percentage(oldEffectivePpi / newEffectivePpi);
-          resultSize.textContent = scale;
-          resultQuality.textContent = this.#percentage(newScale / oldScale);
-          resultFont.textContent = (16 * (scale / 100)).toFixed(2);
+          this.#setResult("size", scale.toFixed(2));
+          this.#setResult(
+            "quality",
+            this.#percentage(newScale / oldScale).toFixed(2)
+          );
+          this.#setResult("font", (16 * (scale / 100)).toFixed(2));
+          this.#setResult("old-ppi-raw", oldPpi.toFixed(2));
+          this.#setResult("old-ppi-effective", oldEffectivePpi.toFixed(2));
+          this.#setResult("new-ppi-raw", newPpi.toFixed(2));
+          this.#setResult("new-ppi-effective", newEffectivePpi.toFixed(2));
+        }
+
+        #setResult(name, value) {
+          this.#$(`#result-${name}`).textContent = value;
         }
 
         #percentage(x) {
@@ -279,11 +350,11 @@
   </head>
   <body>
     <h1>screeny</h1>
-    <p>
-      a screen comparison tool &bull; by
-      <a href="https://wavebeem.com">wavebeem</a> &bull;
-      <a href="https://github.com/wavebeem/screeny">source code</a>
-    </p>
+    <ul class="inline-list">
+      <li>a screen comparison tool</li>
+      <li>by <a href="https://wavebeem.com">wavebeem</a></li>
+      <li><a href="https://github.com/wavebeem/screeny">source code</a></li>
+    </ul>
     <screeny-app>
       <form>
         <fieldset class="old">
@@ -343,23 +414,67 @@
           </button>
         </div>
         <output class="full-width">
-          <ul>
-            <li>
-              the new screen is
-              <span class="result" id="result-size">???</span>% as large as the
-              old screen
-            </li>
-            <li>
-              the new screen is
-              <span class="result" id="result-quality">???</span>% as detailed
-              as the old screen
-            </li>
-            <li>
-              16 old screen pixels are the size of
-              <span class="result" id="result-font">???</span> new screen pixels
-            </li>
-          </ul>
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>old</th>
+                <th>new</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>size</th>
+                <td>100.00%</td>
+                <td><span class="result" id="result-size">???</span>%</td>
+              </tr>
+              <tr>
+                <th>detail</th>
+                <td>100.00%</td>
+                <td><span class="result" id="result-quality">???</span>%</td>
+              </tr>
+              <tr>
+                <th>font size</th>
+                <td>16.00px</td>
+                <td><span class="result" id="result-font">???</span>px</td>
+              </tr>
+              <tr>
+                <th>raw PPI</th>
+                <td><span class="result" id="result-old-ppi-raw">???</span></td>
+                <td><span class="result" id="result-new-ppi-raw">???</span></td>
+              </tr>
+              <tr>
+                <th>PPI</th>
+                <td>
+                  <span class="result" id="result-old-ppi-effective">???</span>
+                </td>
+                <td>
+                  <span class="result" id="result-new-ppi-effective">???</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </output>
+        <dl class="full-width">
+          <dt>size</dt>
+          <dd>percentage difference in PPI between screens</dd>
+
+          <dt>detail</dt>
+          <dd>how many hardware pixels back each software pixel</dd>
+
+          <dt>font size</dt>
+          <dd>
+            a 16px font size looks like this many pixels on the new display
+          </dd>
+
+          <dt>raw PPI</dt>
+          <dd>the pixels per inch at a hardware level</dd>
+
+          <dt>PPI</dt>
+          <dd>
+            lower number = larger on screen objects
+          </dd>
+        </dl>
       </form>
     </screeny-app>
   </body>
