@@ -27,7 +27,7 @@ body {
 
 body {
   font-family: "Roboto", sans-serif;
-  background: PapayaWhip;
+  background: papayawhip;
   color: black;
   padding: 16px;
   max-width: 40rem;
@@ -56,8 +56,7 @@ h1 {
   margin-bottom: 0;
   line-height: 1.25;
   background: black;
-  color: white;
-  color: PapayaWhip;
+  color: papayawhip;
   text-transform: uppercase;
   padding: 0 8px;
   max-width: max-content;
@@ -65,10 +64,11 @@ h1 {
   font-weight: 300;
 }
 
-h1 + ul {
+h1 + p {
   list-style-type: square;
-  margin-top: 0;
+  margin-top: 8px;
   margin-bottom: 32px;
+  font-size: 1rem;
 }
 
 fieldset {
@@ -116,13 +116,13 @@ output {
   display: block;
   border: 2px dotted;
   padding: 16px;
-  background: palegoldenrod;
+  background: khaki;
 }
 
 dl {
   border-radius: 0;
   margin: 0;
-  background: floralwhite;
+  background: lavender;
 
   padding: 16px;
   border: 2px dotted;
@@ -156,7 +156,7 @@ output thead tr {
 }
 
 output tbody tr:not(:last-child) {
-  border-bottom: 1px solid rgb(from currentColor r g b / 25%);
+  border-bottom: 1px solid rgb(from currentColor r g b / 10%);
 }
 
 output th {
@@ -228,21 +228,6 @@ button:active {
 
 .full-width {
   grid-column: 1 / -1;
-}
-
-.inline-list {
-  padding: 0;
-  padding-left: 1em;
-}
-
-@media (width >= 40rem) {
-  .inline-list {
-    display: flex;
-    list-style-position: inside;
-    padding: 0;
-    gap: 0 8px;
-    flex-wrap: wrap;
-  }
 }
 
 :any-link {
