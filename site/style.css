@@ -15,6 +15,10 @@
   font-display: swap;
 }
 
+html {
+  scrollbar-color: black transparent;
+}
+
 html,
 body {
   margin: 0;
